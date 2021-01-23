@@ -17,7 +17,7 @@ services:
             - MYSQL_ROOT_PASSWORD=superdupersecret
             - MYSQL_AUTHENTICATION_PLUGIN=mysql_native_password
         volumes:
-            - /data/mysql/data:/bitnami/mysql/data
+            - /data/mysql/master:/bitnami/mysql/data
         networks:
             - database_net
         deploy:
@@ -46,7 +46,7 @@ services:
             - MYSQL_MASTER_ROOT_PASSWORD=superdupersecret
             - MYSQL_AUTHENTICATION_PLUGIN=mysql_native_password
         volumes:
-            - /data/mysql/data:/bitnami/mysql/data
+            - /data/mysql/slave:/bitnami/mysql/data
         networks:
             - database_net
         deploy:
