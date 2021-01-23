@@ -1,0 +1,61 @@
+version: "3.5"
+services:
+    master:
+        image: bitnami/mysql:8.0-debian-10
+        ports:
+            - published: 25060
+              target: 3306
+              mode: host
+        environment:
+            - BITNAMI_DEBUG=true
+            - MYSQL_REPLICATION_MODE=master
+            - MYSQL_REPLICATION_USER=repluser
+            - MYSQL_REPLICATION_PASSWORD=replpasswd
+            - MYSQL_USER=artemtech
+            - MYSQL_PASSWORD=supersecret
+            - MYSQL_ROOT_USER=artemtechdev
+            - MYSQL_ROOT_PASSWORD=superdupersecret
+            - MYSQL_AUTHENTICATION_PLUGIN=mysql_native_password
+        volumes:
+            - /data/mysql/data:/bitnami/mysql/data
+        networks:
+            - database_net
+        deploy:
+            replicas: 1
+            restart_policy:
+                condition: any 
+            placement:
+                constraints: ["node.labels.database == master"]
+    slave:
+        image: bitnami/mysql:8.0-debian-10
+        depends_on: 
+            - master
+        ports:
+            - published: 25060
+              target: 3306
+              mode: host
+        environment:
+            - BITNAMI_DEBUG=true
+            - MYSQL_REPLICATION_MODE=slave
+            - MYSQL_REPLICATION_USER=repluser
+            - MYSQL_REPLICATION_PASSWORD=replpasswd
+            - MYSQL_USER=artemtech
+            - MYSQL_MASTER_HOST=ip_publik_si_master
+            - MYSQL_MASTER_PORT_NUMBER=25060
+            - MYSQL_MASTER_ROOT_USER=artemtechdev
+            - MYSQL_MASTER_ROOT_PASSWORD=superdupersecret
+            - MYSQL_AUTHENTICATION_PLUGIN=mysql_native_password
+        volumes:
+            - /data/mysql/data:/bitnami/mysql/data
+        networks:
+            - database_net
+        deploy:
+            replicas: 0
+            restart_policy:
+                condition: any
+            placement:
+                constraints: ["node.labels.database == slave"]
+
+networks:
+    database_net:
+        external: true
